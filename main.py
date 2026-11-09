@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """
 GOAL: guess a random 8 letter string of text
 METHOD: a parent guesses and is told how good their guess is, the best mate with the other top 20 guesses (randomly) 
@@ -39,3 +40,10 @@ print(goal)
 the_first = Origin(str_generator())
 print(the_first.dna)
 print(the_first.score_fun(goal))
+=======
+class DNA:
+    def __init__(self):
+        self.genes = []
+
+        
+>>>>>>> gen-evolution-programm/main
