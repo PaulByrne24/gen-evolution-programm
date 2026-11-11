@@ -21,8 +21,25 @@ class Origin: # the parents, the original guessers
                 self.score += 1
         return self.score / len(self.dna)
 
-    def breed(self):
-        pass
+    def breed(self, dna_other): # takes half of a string and another half of a string and merges them
+        new_dna = []
+        new_dna.append(self.dna[0:4])
+        new_dna.append(dna_other[4:8])
+        new_dna = "".join(new_dna)
+        return new_dna
+
+
+# a list of people with the best scores, a function that randomly inserts two into the breeder function
+
+def create_community():
+    com = []
+    for i in range(20):
+        com.append(Origin(str_generator()))
+    return com
+
+
+def compare_scores():
+    pass
 
 def str_generator(): # makes the 8 letter string
     alphabet = "abcdefghijklmnopqrstuvwxyz"
@@ -36,6 +53,15 @@ def str_generator(): # makes the 8 letter string
 
 goal = str_generator()
 print(goal)
+
 the_first = Origin(str_generator())
+the_sec = Origin(str_generator())
+
 print(the_first.dna)
 print(the_first.score_fun(goal))
+print(the_sec.dna)
+print(the_sec.score_fun(goal))
+
+child = Origin(the_first.breed(the_sec.get_dna()))
+print(child.get_dna())
+print(child.score_fun(goal))
