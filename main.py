@@ -12,11 +12,11 @@ class Origin: # the parents, the original guessers
         self.dna = dna
         self.score = 0
 
-
     def get_dna(self):
         return self.dna
 
     def score_fun(self, guess):
+        self.score = 0
         for i in range(8):
             if self.dna[i] == guess[i]:
                 self.score += 1
@@ -29,54 +29,50 @@ class Origin: # the parents, the original guessers
         new_dna.append(self.dna[0:x])
         new_dna.append(dna_other[x:8])
         new_dna = "".join(new_dna)
+
         return new_dna
 
 class Community:
-    def __init__(self):
-        self.comm = self.create_community()
-        self.score_comm = self.sort_scores(self.comm)
+    def __init__(self, community):
+        self.community_list = community # list of Origins
+        self.id_and_score = {}
+        self.sorted_scores = []
         self.next_gen = []
+        self.best_score = 0
 
-# a list of people with the best scores, a function that randomly inserts two into the breeder function
-    def get_community(self):
-        temp_list = []
-        for x in range(len(self.comm)):
-            temp_list.append(self.comm[x].get_dna())
+    def create_comm_dict(self):
+        for x in range(len(self.community_list)):
+            self.id_and_score[self.community_list[x]] = self.community_list[x].score_fun(goal)
+        self.community_list.clear()
+        return self.id_and_score
 
-        return temp_list
-
-
-    def create_community(self):
-        com = []
-        for i in range(20):
-            com.append(Origin(str_generator()))
-        return com
-
-
-    def sort_scores(self, comm):
-        score_list = []
-        for x in range(len(comm)):
-            score_list.append(comm[x].score_fun(goal))
-        score_list.sort(reverse=True)
-        # takes the community and converts it all into a list of their scores, then sorts them from highest to lowest
-        return score_list
+    def sort_scores(self):
+        self.sorted_scores = sorted(self.id_and_score.items(), key=lambda item: float(item[1]), reverse=True)
+        self.best_score = self.sorted_scores[0][1]
+        self.id_and_score.clear()
+        return self.sorted_scores
 
     def make_new_gen(self):
-        new_com = self.comm[:int(len(self.comm)/2)]
-        top_scorers = self.score_comm[:int(len(self.score_comm)/2)]
-
-        for i in range(len(top_scorers)):
-            self.next_gen.append(Origin(new_com[i].breed(new_com[len(new_com)-1-i].get_dna()))) # takes the first person in community and breeds them with the last 
+        top_community = self.sorted_scores
+        self.next_gen.clear()
+        for i in range(len(top_community)):
+            new_child = Origin(top_community[i][0].breed(top_community[randint(1, len(top_community)-1)][0].get_dna()))
+            self.next_gen.append(new_child) # takes the first person in community and breeds them with the last 
         # to remember, this is creating new "Origins". The first persons breed function is called upon and I added the last persons dna as the secondary dna
-
+        self.replace_old_gen()
+    
     def replace_old_gen(self):
-        self.comm = self.next_gen
+        self.community_list = list(self.next_gen)
+        return self.community_list
 
-"""Huge Problem I didn't realize until now. I sorted the scores but didn't save their dna/list position. Meaning I have to now
-manually sort through every one and find which score belongs to which dna. I've thought of a few ways of doing this: 
-1. save the index of each dna and its score in a separate list and then call on that
-2. make a manual sorter that compares each score and puts it from best to worst and at the same time moves the asociated dna to its postiion
-3. don't sort the scores keep them as is but take the indicies of each one and breed them that way"""
+"""Sorter finally finished. It kind of works, and made a central loop. Only thing left is the mutations. This code was a fucking nightmare to write
+and rewrite. I think I reset like 4 times before getting an epiphany and finishing the last bit"""
+
+def create_community():
+    com = []
+    for i in range(50):
+        com.append(Origin(str_generator()))
+    return com
 
 def str_generator(): # makes the 8 letter string
     alphabet = "abcdefghijklmnopqrstuvwxyz"
@@ -93,17 +89,22 @@ print("Goal", goal)
 
 # pers1 = Origin(str_generator())
 # pers2 = Origin(str_generator())
-# print("Pers1 DNA:", pers1.get_dna())
+# print("Pers1 DNA:", pers1.summary)
 # print("Pers2 Dna:", pers2.get_dna())
 
 # child = Origin(pers1.breed(pers2.get_dna()))
 # print("Child dna:", child.get_dna())
-new_comm = Community()
-print("First Gen:", new_comm.get_community())
-new_comm.make_new_gen()
-print(new_comm.compare_scores(new_comm.comm))
-print("Second Gen:", new_comm.get_community())
-new_comm.make_new_gen()
-print(new_comm.compare_scores(new_comm.comm))
-new_comm.make_new_gen()
-print(new_comm.compare_scores(new_comm.comm))
+
+the_community = create_community()
+community = Community(the_community)
+gen = 0
+while community.best_score < 1.0:
+    if gen % 100 == 0:
+        print("GEN:", gen, "best:", community.best_score)
+    print("GEN:", gen)
+    community.create_comm_dict()
+    community.sort_scores()
+    community.make_new_gen()
+    gen += 1
+
+
